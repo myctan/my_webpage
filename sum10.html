@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>SUM-10 · Yong Chuang's Game</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="favicon1.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather&family=Montserrat&family=Sacramento&display=swap">
+  <style>
+    /* ── Page-specific styling, scoped to match portfolio aesthetic ── */
+    body {
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      background-color: #ff4c68;
+      color: #fff;
+    }
+
+    /* Hero header — same cloud/mountain feel as homepage */
+    .game-top {
+      background-color: #ff4c68;
+      color: #fff;
+      position: relative;
+      padding-top: 50px;
+      padding-bottom: 100px;
+      text-align: center;
+    }
+    .game-top h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3rem;
+      font-weight: bold;
+      line-height: 1.5;
+      margin: 30px 50px;
+    }
+    .game-top h1 .accent {
+      font-family: 'Sacramento', cursive;
+      color: #ffe26f;
+    }
+    .game-top h2 {
+      font-family: 'Merriweather', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      margin: 0 50px 30px;
+      font-weight: normal;
+    }
+    .top-cloud-game {
+      position: absolute;
+      right: 30%;
+      top: 5%;
+      width: 60px;
+    }
+    .bottom-cloud-game {
+      position: absolute;
+      left: 25%;
+      bottom: 30%;
+      width: 50px;
+    }
+    .game-top .mountain-img {
+      width: 100%;
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    /* Game body section — white middle container like homepage */
+    .game-middle {
+      background-color: #fff;
+      color: #555;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .game-middle h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      color: #ff4c68;
+      margin-bottom: 30px;
+    }
+    .game-middle .instructions {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      font-family: 'Merriweather', serif;
+      line-height: 2;
+      color: #555;
+    }
+    .game-middle .instructions b {
+      color: #ef8172;
+    }
+
+    /* HUD ── softer, themed palette */
+    .hud {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .hud-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .hud-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: #999;
+      text-transform: uppercase;
+    }
+    .hud-value {
+      font-family: 'Sacramento', cursive;
+      font-size: 2.6rem;
+      color: #ff4c68;
+      min-width: 80px;
+      text-align: center;
+      transition: color 0.15s, transform 0.15s;
+      line-height: 1;
+    }
+    .hud-value.flash-score {
+      color: #ffb700 !important;
+      transform: scale(1.15);
+    }
+
+    .speed-bar-track {
+      width: 120px;
+      height: 8px;
+      background: #f4f4f4;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .speed-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4dd0a8, #ffb700, #ff4c68);
+      transition: width 0.5s ease;
+      border-radius: 4px;
+    }
+
+    /* Track box ── soft card style */
+    .track-wrapper { position: relative; display: inline-block; margin: 0 auto 30px; }
+    .track-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+
+    .cells {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .cell {
+      width: 64px;
+      height: 80px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #ddd;
+      transition: border-color 0.1s, background 0.1s;
+    }
+    .cell.active {
+      border-color: #ff4c68;
+      background: #fff5f6;
+      color: #ff4c68;
+      box-shadow: 0 0 12px rgba(255,76,104,0.2);
+    }
+    .cell.danger {
+      border-color: #ff4c68;
+      background: #ffe5e9;
+      color: #ff4c68;
+      box-shadow: 0 0 16px rgba(255,76,104,0.4);
+    }
+
+    .divider {
+      width: 2px;
+      height: 50px;
+      background: #eee;
+      margin: 0 6px;
+    }
+
+    .input-cell {
+      width: 64px;
+      height: 80px;
+      background: #fff5f0;
+      border: 2px solid #ef8172;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #ef8172;
+      box-shadow: 0 0 12px rgba(239,129,114,0.2);
+      position: relative;
+    }
+    .input-cell::after {
+      content: 'YOUR #';
+      position: absolute;
+      bottom: -22px;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: #999;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .sum-preview {
+      position: absolute;
+      top: -28px;
+      right: 24px;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      color: #999;
+      font-family: 'Montserrat', sans-serif;
+      transition: color 0.2s;
+    }
+    .sum-preview.match {
+      color: #ffb700;
+      font-weight: bold;
+    }
+
+    .match-flash, .miss-flash {
+      position: absolute; inset: 0; border-radius: 12px;
+      opacity: 0; pointer-events: none; transition: opacity 0.1s;
+    }
+    .match-flash { background: rgba(77, 208, 168, 0.2); }
+    .miss-flash  { background: rgba(255, 76, 104, 0.2); }
+    .match-flash.show, .miss-flash.show { opacity: 1; }
+
+    /* Misses dots */
+    .misses { display: flex; gap: 8px; align-items: center; }
+    .miss-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid #ddd; background: transparent;
+      transition: all 0.2s;
+    }
+    .miss-dot.used {
+      background: #ff4c68; border-color: #ff4c68;
+      box-shadow: 0 0 6px rgba(255,76,104,0.5);
+    }
+
+    /* Controls hint */
+    .controls {
+      display: flex; gap: 32px; justify-content: center;
+      margin-top: 16px; flex-wrap: wrap;
+    }
+    .ctrl {
+      display: flex; align-items: center; gap: 10px;
+      color: #888; font-size: 0.85rem;
+      font-family: 'Merriweather', serif;
+    }
+    .key {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 4px 12px;
+      background: #fafafa; border: 1px solid #ddd;
+      border-bottom: 2px solid #bbb;
+      border-radius: 4px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.75rem; color: #666;
+      min-width: 28px; font-weight: bold;
+    }
+
+    /* Overlay (start/game-over) */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 20px; z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+    .overlay-title {
+      font-family: 'Sacramento', cursive;
+      font-size: 5rem;
+      color: #ff4c68;
+      text-align: center;
+      line-height: 1;
+    }
+    .overlay-sub {
+      font-family: 'Merriweather', serif;
+      font-size: 1rem;
+      color: #555;
+      text-align: center;
+      line-height: 1.8;
+      max-width: 500px;
+      padding: 0 20px;
+    }
+    .overlay-sub b { color: #ef8172; }
+    .overlay-score {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: #ffb700;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+    }
+    .start-btn {
+      margin-top: 12px;
+      padding: 14px 48px;
+      background: #ff4c68;
+      border: none;
+      border-radius: 100px;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 4px 12px rgba(255,76,104,0.3);
+    }
+    .start-btn:hover {
+      background: #ef8172;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255,76,104,0.4);
+    }
+
+    /* Leaderboard */
+    .leaderboard {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 20px 24px;
+      width: 280px;
+      margin: 30px auto 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .lb-title {
+      font-family: 'Sacramento', cursive;
+      font-size: 1.8rem;
+      color: #ff4c68;
+      text-align: center;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+    .lb-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-rank {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.7rem; font-weight: bold;
+      color: #ccc;
+      width: 24px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .lb-rank.gold   { color: #ffb700; }
+    .lb-rank.silver { color: #b8b8b8; }
+    .lb-rank.bronze { color: #cd7f32; }
+    .lb-bar-wrap {
+      flex: 1; height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .lb-bar {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, #ff4c68, #ef8172);
+      transition: width 0.6s ease;
+    }
+    .lb-score {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem; font-weight: bold;
+      color: #ff4c68;
+      text-align: right;
+      min-width: 40px;
+      flex-shrink: 0;
+    }
+    .lb-score.empty { color: #ccc; }
+    .lb-new {
+      font-size: 0.6rem; color: #ffb700;
+      font-weight: bold; letter-spacing: 0.1em;
+      animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Floating +10 */
+    .float-text {
+      position: fixed;
+      font-family: 'Sacramento', cursive;
+      font-size: 2.5rem;
+      color: #ffb700;
+      pointer-events: none;
+      z-index: 200;
+      animation: floatUp 0.9s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-60px); }
+    }
+
+    /* Footer matches homepage */
+    .game-bottom {
+      background-color: #ef8172;
+      color: #fff;
+      text-align: center;
+      padding: 30px 0 20px;
+    }
+    .game-bottom .footer-link {
+      color: #fff;
+      margin: 20px 20px 30px 20px;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      display: inline-block;
+    }
+    .game-bottom .footer-link:hover { color: #ffe26f; }
+    .game-bottom .copyright {
+      color: #fff;
+      font-size: 0.85rem;
+      margin: 10px 0 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      color: #ff4c68;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+    }
+    .back-link:hover { color: #ef8172; }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-title" id="overlayTitle">Sum<span style="color:#ffb700">·10</span></div>
+    <div class="overlay-sub" id="overlaySub">
+      A number slides toward you from the right.<br>
+      Add YOUR number (<b>SPACE</b>) to make <b>10</b>.<br>
+      Press <b>ENTER</b> when aligned. Don't miss 3 times!
+    </div>
+    <div class="overlay-score" id="overlayScore" style="display:none"></div>
+    <button class="start-btn" id="startBtn">► PLAY</button>
+  </div>
+
+  <!-- Top hero -->
+  <div class="game-top">
+    <img class="top-cloud-game" src="images/cloud.png" alt="cloud-img">
+    <h1>Sum<span class="accent">·10</span></h1>
+    <h2>A little number game I built. Can you keep up?</h2>
+    <img class="bottom-cloud-game" src="images/cloud.png" alt="cloud-img">
+    <img class="mountain-img" src="images/mountain.png" alt="mountain-img">
+  </div>
+
+  <!-- Game container -->
+  <div class="game-middle">
+    <h2>Let's Play.</h2>
+    <p class="instructions">
+      A number slides toward you from the right.
+      Tap <b>SPACE</b> to change your number, then hit <b>ENTER</b> when the two numbers add up to <b>10</b>.
+      Speed up with each match. Three misses and it's game over!
+    </p>
+
+    <div class="hud">
+      <div class="hud-item">
+        <div class="hud-label">Score</div>
+        <div class="hud-value" id="scoreDisplay">0</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Speed</div>
+        <div class="speed-bar-track">
+          <div class="speed-bar-fill" id="speedBar" style="width:5%"></div>
+        </div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Misses</div>
+        <div class="misses" id="misses">
+          <div class="miss-dot" id="m0"></div>
+          <div class="miss-dot" id="m1"></div>
+          <div class="miss-dot" id="m2"></div>
+        </div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Best</div>
+        <div class="hud-value" id="bestDisplay">0</div>
+      </div>
+    </div>
+
+    <div class="track-wrapper">
+      <div class="sum-preview" id="sumPreview">SUM: —</div>
+      <div class="track-box" id="trackBox">
+        <div class="match-flash" id="matchFlash"></div>
+        <div class="miss-flash" id="missFlash"></div>
+
+        <div class="input-cell" id="inputCell">0</div>
+        <div class="divider"></div>
+        <div class="cells" id="cells">
+          <div class="cell" id="cell0"></div>
+          <div class="cell" id="cell1"></div>
+          <div class="cell" id="cell2"></div>
+          <div class="cell" id="cell3"></div>
+          <div class="cell" id="cell4"></div>
+          <div class="cell" id="cell5"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl"><span class="key">SPACE</span> Change your number</div>
+      <div class="ctrl"><span class="key">ENTER</span> Try to match 10</div>
+    </div>
+
+    <div class="leaderboard" id="leaderboard">
+      <div class="lb-title">Top 5</div>
+      <div id="lbRows"></div>
+    </div>
+
+    <a class="back-link" href="index.html">← Back to homepage</a>
+  </div>
+
+  <!-- Footer matches homepage -->
+  <div class="game-bottom">
+    <a class="footer-link" href="https://www.linkedin.com/in/yong-chuang-tan-58625027/">LinkedIn</a>
+    <a class="footer-link" href="https://twitter.com/TeddyTanYC">Twitter</a>
+    <a class="footer-link" href="index.html">Home</a>
+    <p class="copyright">©2022 YongChuang Tan</p>
+  </div>
+
+<script>
+// ─── Audio via Web Audio API ────────────────────────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function ensureAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
+
+function playChime() {
+  ensureAudio();
+  const freqs = [523.25, 659.25, 783.99, 1046.5];
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    const t = audioCtx.currentTime + i * 0.1;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    osc.start(t); osc.stop(t + 0.4);
+  });
+}
+function playMiss() {
+  ensureAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.25);
+  gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+}
+function playWrongPress() {
+  ensureAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.type = 'square';
+  osc.frequency.value = 160;
+  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+}
+
+// ─── Game State ──────────────────────────────────────────────────────────────
+const NUM_CELLS = 6;
+let score = 0;
+let best = parseInt(localStorage.getItem('sum10best') || '0');
+let misses = 0;
+let MAX_MISSES = 3;
+let playerNum = 0;
+let running = false;
+
+let numValue = null;
+let numPos = null;
+
+let baseInterval = 1600;
+let minInterval  = 280;
+let matchCount   = 0;
+
+function currentInterval() {
+  const progress = Math.min(matchCount / 25, 1);
+  return baseInterval - (baseInterval - minInterval) * Math.pow(progress, 0.6);
+}
+
+let lastTick = 0;
+let animFrame = null;
+
+const cells = Array.from({length: NUM_CELLS}, (_, i) => document.getElementById('cell' + i));
+const inputCellEl = document.getElementById('inputCell');
+const scoreEl     = document.getElementById('scoreDisplay');
+const bestEl      = document.getElementById('bestDisplay');
+const speedBarEl  = document.getElementById('speedBar');
+const sumPreviewEl = document.getElementById('sumPreview');
+const matchFlash  = document.getElementById('matchFlash');
+const missFlash   = document.getElementById('missFlash');
+const overlay     = document.getElementById('overlay');
+const overlayTitle = document.getElementById('overlayTitle');
+const overlaySub  = document.getElementById('overlaySub');
+const overlayScore = document.getElementById('overlayScore');
+const startBtn    = document.getElementById('startBtn');
+
+const missDots = [
+  document.getElementById('m0'),
+  document.getElementById('m1'),
+  document.getElementById('m2'),
+];
+
+function renderTrack() {
+  cells.forEach((el) => { el.textContent = ''; el.className = 'cell'; });
+  if (numValue !== null && numPos !== null) {
+    const slot = Math.round(numPos);
+    if (slot >= 0 && slot < NUM_CELLS) {
+      cells[slot].textContent = numValue;
+      cells[slot].classList.add('active');
+      if (slot === 0) cells[slot].classList.add('danger');
+    }
+  }
+  inputCellEl.textContent = playerNum;
+
+  if (numValue !== null) {
+    const sum = playerNum + numValue;
+    sumPreviewEl.textContent = `SUM: ${playerNum} + ${numValue} = ${sum}`;
+    sumPreviewEl.className = 'sum-preview' + (sum === 10 ? ' match' : '');
+  } else {
+    sumPreviewEl.textContent = 'SUM: —';
+    sumPreviewEl.className = 'sum-preview';
+  }
+
+  const ratio = (currentInterval() - minInterval) / (baseInterval - minInterval);
+  const pct = Math.max(5, Math.round((1 - ratio) * 100));
+  speedBarEl.style.width = pct + '%';
+
+  missDots.forEach((d, i) => {
+    d.className = 'miss-dot' + (i < misses ? ' used' : '');
+  });
+  bestEl.textContent = best;
+}
+
+function spawnNumber() {
+  numValue = Math.floor(Math.random() * 10) + 1;
+  numPos = NUM_CELLS - 1;
+}
+
+function tick(ts) {
+  if (!running) return;
+  const interval = currentInterval();
+  const dt = ts - lastTick;
+  if (dt >= interval) {
+    lastTick = ts;
+    if (numValue === null) {
+      spawnNumber();
+    } else {
+      numPos -= 1;
+      if (numPos < 0) handleMiss();
+    }
+  }
+  renderTrack();
+  animFrame = requestAnimationFrame(tick);
+}
+
+function handleMiss() {
+  misses++;
+  numValue = null; numPos = null;
+  flashMiss(); playMiss();
+  if (misses >= MAX_MISSES) { endGame(); return; }
+}
+
+function flashMatch() {
+  matchFlash.classList.add('show');
+  setTimeout(() => matchFlash.classList.remove('show'), 250);
+}
+function flashMiss() {
+  missFlash.classList.add('show');
+  setTimeout(() => missFlash.classList.remove('show'), 250);
+}
+
+function addScore(pts, x, y) {
+  score += pts;
+  if (score > best) {
+    best = score;
+    localStorage.setItem('sum10best', best);
+  }
+  scoreEl.textContent = score;
+  scoreEl.classList.add('flash-score');
+  setTimeout(() => scoreEl.classList.remove('flash-score'), 400);
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = '+' + pts;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+function handleEnter() {
+  if (!running) return;
+  ensureAudio();
+  if (numValue === null) { playWrongPress(); return; }
+  const sum = playerNum + numValue;
+  if (sum === 10) {
+    matchCount++;
+    const rect = cells[0].getBoundingClientRect();
+    addScore(10, rect.left + rect.width / 2 - 20, rect.top - 10);
+    playChime(); flashMatch();
+    numValue = null; numPos = null;
+  } else {
+    playWrongPress(); flashMiss();
+  }
+}
+
+function handleSpace() {
+  if (!running) return;
+  playerNum = (playerNum + 1) % 10;
+  renderTrack();
+}
+
+function startGame() {
+  score = 0; misses = 0; playerNum = 0; matchCount = 0;
+  numValue = null; numPos = null;
+  scoreEl.textContent = '0';
+  overlay.style.display = 'none';
+  running = true;
+  lastTick = performance.now();
+  animFrame = requestAnimationFrame(tick);
+  renderTrack();
+}
+
+function endGame() {
+  running = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  saveScore(score);
+  renderLeaderboard(score);
+  overlayTitle.innerHTML = 'Game Over';
+  overlaySub.innerHTML = 'You missed 3 numbers.<br>Better luck next time!';
+  overlayScore.style.display = 'block';
+  overlayScore.textContent = 'SCORE: ' + score + (score >= best ? '  ★ NEW BEST' : '  |  BEST: ' + best);
+  startBtn.textContent = '► RETRY';
+  overlay.style.display = 'flex';
+}
+
+// ─── Leaderboard ────────────────────────────────────────────────────────────
+const TOP_N = 5;
+
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem('sum10scores') || '[]'); }
+  catch(e) { return []; }
+}
+function saveScore(s) {
+  let scores = loadScores();
+  scores.push(s);
+  scores.sort((a, b) => b - a);
+  scores = scores.slice(0, TOP_N);
+  localStorage.setItem('sum10scores', JSON.stringify(scores));
+  return scores;
+}
+function renderLeaderboard(highlightScore) {
+  const scores = loadScores();
+  const lbRows = document.getElementById('lbRows');
+  const rankClasses = ['gold', 'silver', 'bronze', '', ''];
+  const rankLabels = ['1ST', '2ND', '3RD', '4TH', '5TH'];
+  const maxScore = scores.length ? scores[0] : 1;
+  lbRows.innerHTML = '';
+  for (let i = 0; i < TOP_N; i++) {
+    const row = document.createElement('div');
+    row.className = 'lb-row';
+    const val = scores[i] !== undefined ? scores[i] : null;
+    const barPct = val !== null ? Math.max(4, Math.round((val / maxScore) * 100)) : 0;
+    const isNew = val !== null && val === highlightScore && i === scores.indexOf(highlightScore);
+    row.innerHTML = `
+      <span class="lb-rank ${rankClasses[i]}">${rankLabels[i]}</span>
+      <div class="lb-bar-wrap"><div class="lb-bar" style="width:${barPct}%"></div></div>
+      <span class="lb-score${val === null ? ' empty' : ''}">${val !== null ? val : '&mdash;'}${isNew ? ' <span class=\"lb-new\">NEW</span>' : ''}</span>
+    `;
+    lbRows.appendChild(row);
+  }
+}
+
+// ─── Key bindings ───────────────────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); if (running) handleSpace(); }
+  if (e.code === 'Enter') { e.preventDefault(); if (running) handleEnter(); }
+});
+
+startBtn.addEventListener('click', () => { ensureAudio(); startGame(); });
+
+bestEl.textContent = best;
+renderTrack();
+renderLeaderboard(null);
+</script>
+</body>
+</html>
