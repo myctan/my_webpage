@@ -91,6 +91,7 @@ padding: 50px 0 20px;
   margin: 50px auto 50px auto;
   text-align: left;
   line-height: 2;
+  overflow: auto; /* clearfix: keeps floated images contained within this row */
 }
 .skill-1{
   width: 25%;
@@ -100,15 +101,17 @@ padding: 50px 0 20px;
 .skill-2{
   width: 25%;
   float: right;
-  margin-left: 0;
+  margin-left: 30px;
 }
 .my-game {
   width: 50%;
   margin: auto;
+  padding-bottom: 80px; /* breathing room for the .btn that has top:50px */
  }
 .contact-me{
   width: 50%;
   margin: auto;
+  padding-bottom: 80px;
 }
 .btn{
   position:relative;
